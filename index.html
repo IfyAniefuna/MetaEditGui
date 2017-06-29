@@ -66,6 +66,26 @@
 
       <hr/>
 
+      <p>
+        Toggle between <i>Edit</i> or <i>Creation</i> metadata functions
+      </p>
+
+      <input id="switch1" type="checkbox" checked data-toggle="toggle" data-on="Edit" data-off="Creation"
+             data-offstyle="success">
+      <script>
+        $(function () {
+          $('#switch1').change(function () {
+            if ($(this).prop('checked')) {
+              create_form('Edit');
+            } else {
+              create_form('Creation');
+            }
+          })
+        })
+      </script>
+
+      <hr/>
+
       <div id="generic_instructions">
       <p>
         <i>Using this tool at SBRG:</i>
