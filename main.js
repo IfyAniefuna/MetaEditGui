@@ -275,6 +275,7 @@ function get_data_array() {
   for(var i = 0; i < data.length; i++){
     var val = get_value(data[i]['id'])
     data_array.push([data[i]['id'], val])
+     console.log(val)
   }
   return data_array
 }
