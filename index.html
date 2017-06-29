@@ -64,8 +64,25 @@
         })
       </script>
 
-      <input id="switch" type="checkbox" checked data-toggle="toggle" data-on="Edit" data-off=""
+      <hr/>
+      
+      <p>
+        Toggle between <i>Edit</i> and <i>Creation</i> metadata functions
+      </p>
+
+      <input id="switch1" type="checkbox" checked data-toggle="toggle" data-on="Edit" data-off="Creation"
              data-offstyle="success">
+      <script>
+        $(function () {
+          $('#switch').change(function () {
+            if ($(this).prop('checked')) {
+              create_form('Generic');
+            } else {
+              create_form('ALE');
+            }
+          })
+        })
+      </script>
 
       <hr/>
 
