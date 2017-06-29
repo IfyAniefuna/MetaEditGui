@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Experiment Metadata</title>
+    
+    <!-- JS -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.9/d3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script src="lib/select2.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2014-11-29/FileSaver.min.js"></script>
+    <script src="lib/filereader.js"></script>
+    <script src="lib/csv.min.js"></script>
+    <script src="lib/bootstrap-number-input.js"></script>
+    <script src="lib/jszip.min.js"></script>
+    <script src="main.js"></script>
+
+    <!-- CSS -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+    <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+
+    <!-- Bootstrap Toggle -->
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="google" content="notranslate">
+    <meta http-equiv="Content-Language" content="en">
+  </head>
+  <body>
+    <div class="container">
+      <h1>
+        Experimental Metadata
+        <small>[<a href="http://github.com/SBRG/experiment_metadata">GitHub</a>]</small>
+      </h1>
+
+      <p class="lead">
+        Use this tool to generate a CSV file with all the relevant metadata for
+        an experiment.
+      </p>
+
+      <hr/>
+
+      <p>
+        Toggle between <i>Generic</i> or <i>ALE</i> metadata workflows
+      </p>
+
+      <input id="switch" type="checkbox" checked data-toggle="toggle" data-on="Generic" data-off="ALE"
+             data-offstyle="success">
+      <script>
+        $(function () {
+          $('#switch').change(function () {
+            if ($(this).prop('checked')) {
+              create_form('Generic');
+            } else {
+              create_form('ALE');
+            }
+          })
+        })
+      </script>
+
+      <input id="switch" type="checkbox" checked data-toggle="toggle" data-on="Edit" data-off=""
+             data-offstyle="success">
+
+      <hr/>
+
+      <div id="generic_instructions">
+      <p>
+        <i>Using this tool at SBRG:</i>
+      <ol>
+        <li>
+          <strong>Create a new folder</strong> on Nucleoid with the form
+          <code>data/raw_data/{User}/{Project Name}/{Folder Name}/</code>.
+        </li>
+        <ul>
+          <li>
+            Each data type collected on a given day gets a unique folder.
+          </li>
+          <li>
+            The Project Name can be anything you want, but try to make it
+            short, unique, and descriptive.
+          </li>
+          <li>
+            The Folder Name looks like <code>{YYYY}-{MM}-{DD}_{data type}</code>.
+          </li>
+          <li>
+            To make things easier, after you fill out this form, the Folder
+            Name is provided at the bottom of the page.
+          </li>
+          <li>
+            If there are duplicates, then add <code>_1</code>,
+            <code>_2</code>, &hellip; to the end.
+          </li>
+          <li>
+            Example: <code>data/raw_data/z1king/Y-ome/2015-11-19_Tn-Seq_1/</code>
+          </li>
+        </ul>
+        <li>
+          <strong>Copy</strong> raw data files (e.g. <code>*.fastq.gz</code>
+          from the MiSeq) to the new folder.
+        </li>
+        <li>
+          <strong>Fill out this form</strong>, save the CSV file, and put it
+          in your folder.
+        </li>
+      </ol>
+      </p>
+      <hr/>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <strong>(Optional)</strong> Load an existing CSV file as a starting point for the new
+          metadata file.
+        </div>
+        <div class="panel-body">
+          <div id="file-upload">Drag and drop a CSV file.</div> 
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          Enter your metadata.
+        </div>
+        <div id="center-column" class="panel-body">
+        </div>
+      </div>
+      <div class="panel panel-default" id="csv_drag_and_drop">
+        <div class="panel-heading">
+          <strong>(Optional: ALE Specific)</strong> CSV with ALE sample names (row: ALE#, Flask#, Isolate#, Technical Replicate#).
+          <button id="download_example" type="submit" class="btn btn-default">
+            Download Example
+          </button>
+        </div>
+        <div class="panel-body">
+          <div id="name-file-upload">Drag and drop a CSV file.</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-8">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              Save the metadata CSV file with your dataset.
+            </div>
+            <div class="panel-body match-height">
+              <button id="submit" type="submit" class="btn btn-default">
+                Download CSV
+              </button>
+              <span id="required-to-submit" class="alert alert-danger" style="display: none">
+              Some required attributes are missing.
+            </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4" id="folder-name-panel">
+          <div class="panel panel-default">
+            <div class="panel-heading">Folder name</div>
+            <div class="panel-body match-height">
+              <input id="folder-name" class="form-control" onclick="select();" readonly></input>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
