@@ -276,7 +276,6 @@ function get_data_array() {
     var val = get_value(data[i]['id'])
     data_array.push([data[i]['id'], val])
   }
-  console.log(data_array)
   return data_array
 }
 
@@ -309,9 +308,24 @@ function create_uploaders() {
   })
 }
 
+var files = {};
+var file_counter = 0;
+$('#')
 function handle_upload(e, file) {
   var csv_data = e.target.result,
       arrays = new CSV(csv_data).parse()
+  var filename = $("#name-file-upload")
+  alert(filename)
+  var file_id = "File " + file_counter++; //Change name here 
+  // write if same id then alert user
+  files[file_id] = arrays; // data from meta data sheet
+  //alert(files[file_id].toString()); 
+  $('#file_selection').append("<button id='"+file_id+"' onclick='populate_stuff(\""+file_id+"\")'>"+file_id+"</button>");
+  
+}
+
+function populate_stuff(file_id) {
+  var arrays = files[file_id];
   for (var i = 0; i < arrays.length; i++)
     set_value(arrays[i][0], arrays[i][1])
   check_required()
