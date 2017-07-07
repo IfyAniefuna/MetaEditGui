@@ -310,19 +310,42 @@ function create_uploaders() {
 
 var files = {};
 var file_counter = 0;
-$('#')
+//$('#')
 function handle_upload(e, file) {
   var csv_data = e.target.result,
-      arrays = new CSV(csv_data).parse()
-  var filename = $("#name-file-upload")
-  alert(filename)
-  var file_id = "File " + file_counter++; //Change name here 
-  // write if same id then alert user
+  arrays = new CSV(csv_data).parse()
+  var file_id = file.name; //name of file
+  if (file_id in files) { //if file name in array return
+    return
+  }
   files[file_id] = arrays; // data from meta data sheet
-  //alert(files[file_id].toString()); 
-  $('#file_selection').append("<button id='"+file_id+"' onclick='populate_stuff(\""+file_id+"\")'>"+file_id+"</button>");
+
+  $('#file_selection').append("<button id='"+file_id+"' onclick='clickfunct(\""+file_id+"\")'>"+file_id+"</button>");
   
 }
+
+function clickfunct(file_id) {
+  highlight(file_id);
+  populate_stuff(file_id);
+}
+
+
+
+var count = 0
+function highlight(id) {
+    var element = document.getElementById(id);
+
+        if (count == 0) {
+            element.style.backgroundColor = "#FFFFFF"
+            count = 1;        
+        }
+        else {
+            element.style.backgroundColor = "#7FFF00"
+            count = 0;
+        }
+}
+
+
 
 function populate_stuff(file_id) {
   var arrays = files[file_id];
@@ -377,6 +400,7 @@ function handle_name_upload(e, file) {
     set_value('technical-replicate-number',variable_file_name_array[name_idx][TECHNICAL_REPLICATE_IDX])
 
     var file_name = get_file_name() + '.csv'
+
     output_sample_name_array.push([file_name])
 
     var output_sample_csv_data = [new CSV(get_data_array()).encode()]
