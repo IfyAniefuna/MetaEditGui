@@ -2,6 +2,10 @@
 /* global $, Blob, saveAs, CSV, d3, JSZip, _ */
 // CSV: https://github.com/knrz/CSV.js/
 
+$(document).ready(function() {
+        $('#files').multiselect();
+    });
+
 var data = [
   { label: 'Creator (Name)',
     id: 'creator',
@@ -221,7 +225,8 @@ $(document).ready(function(){
 
   // submit
   $('#submit').click(function(){
-    if (!check_required()) return
+    if (!check_required()) 
+      return
     var data_array = get_data_array()
     if (workflow == 'Generic') {
       save_generic_metadata(data_array)
@@ -309,48 +314,77 @@ function create_uploaders() {
 }
 
 var files = {};
+var list_of_file_ids = [];
 var file_counter = 0;
 //$('#')
 function handle_upload(e, file) {
   var csv_data = e.target.result,
   arrays = new CSV(csv_data).parse()
   var file_id = file.name; //name of file
+
+  if (file_id.indexOf(".csv") == -1) {
+    return
+  }
+
   if (file_id in files) { //if file name in array return
     return
   }
   files[file_id] = arrays; // data from meta data sheet
+  list_of_file_ids.push(file_id);
+  $('#files').append("<option value="+file_id+">"+file_id+"</option>");
+  $('#files').multiselect('destroy');
 
-  $('#file_selection').append("<button id='"+file_id+"' onclick='clickfunct(\""+file_id+"\")'>"+file_id+"</button>");
-  
+
+
+  $('#files').multiselect({
+      includeSelectAllOption: true,
+      enableCaseInsensitiveFiltering: true,
+      maxHeight: 500,
+      onChange: function(option, checked, select) {
+            var file_data = files[file_id];
+            var file_keys = Object.keys(files);
+
+            var previouslySelected = [];
+$("#files").each(function() {
+    // Get newly selected elements
+    var currentlySelected = $('#files').val();
+    var newSelections = currentlySelected.filter(function (element) {
+                                console.log(newSelections);
+
+        return previouslySelected.indexOf(element) == -1;
+    });
+    previouslySelected = currentlySelected;
+
+    if (newSelections.length) {
+        // If there are multiple new selections, we'll take the last in the list
+        var lastSelected = newSelections.reverse()[0];
+
+    }
+
+});
+
+            if (checked == true){
+
+
+               for (var j = 0; j < file_keys.length; j++) {
+                       //alert(selected)
+                      if (file_keys[j] in selected) {
+                        file_data = files[file_keys[j]]
+                        alert(file_data)
+                        populate_stuff(file_data);
+                      }
+               }
+            }
+            else if (checked == false){ 
+                  return;
+            } 
+      }
+  });
 }
 
-function clickfunct(file_id) {
-  highlight(file_id);
-  populate_stuff(file_id);
-}
-
-
-
-var count = 0
-function highlight(id) {
-    var element = document.getElementById(id);
-
-        if (count == 0) {
-            element.style.backgroundColor = "#FFFFFF"
-            count = 1;        
-        }
-        else {
-            element.style.backgroundColor = "#7FFF00"
-            count = 0;
-        }
-}
-
-
-
-function populate_stuff(file_id) {
-  var arrays = files[file_id];
-  for (var i = 0; i < arrays.length; i++)
-    set_value(arrays[i][0], arrays[i][1])
+function populate_stuff(file_data) {
+  for (var i = 0; i < file_data.length; i++)
+    set_value(file_data[i][0], file_data[i][1])
   check_required()
 }
 
