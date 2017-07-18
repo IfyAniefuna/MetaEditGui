@@ -214,6 +214,8 @@ var data = [
 var data_as_object = {}
 data.forEach(function(d) { data_as_object[d.id] = d })
 var workflow = 'Generic'
+var files = [];
+var OG_populated_file = []
 
 
 $(document).ready(function(){
@@ -223,6 +225,7 @@ $(document).ready(function(){
 
   create_form('Generic')
 
+
   // submit
   $('#submit').click(function(){
     if (!check_required()) 
@@ -230,6 +233,7 @@ $(document).ready(function(){
     var data_array = get_data_array()
     if (workflow == 'Generic') {
       save_generic_metadata(data_array)
+      console.log(files.length)
     } else {
       save_ale_metadata(data_array)
     }
@@ -281,7 +285,32 @@ function get_data_array() {
     var val = get_value(data[i]['id'])
     data_array.push([data[i]['id'], val])
   }
+  var differences = difference(data_array)
+  for(var j=0; j < files.length; j++) {
+    for(var k=0; k < files[j].length; k++) {
+       for (var l=0; l< differences.length; l++) {
+          if ((files[j][k][0]) == (differences[l][0])) {
+             files[j][k] = differences[l]
+          }
+       }
+    }
+  }
   return data_array
+}
+
+function difference(array) {
+   var the_difference = []
+       for (var k=0; k<OG_populated_file.length; k++) {
+           
+           if (JSON.stringify(array[k]).replace(/[\[\]']+/g,'') != JSON.stringify(OG_populated_file[k]).replace(/[\[\]']+/g,'')) {
+             //alert("john I did it");
+             //console.log(JSON.stringify(array[k]));
+             //console.log(JSON.stringify(OG_populated_file[k]));
+             the_difference.push(array[k]);
+           }
+       }
+    
+    return the_difference;
 }
 
 function check_required() {
@@ -313,8 +342,6 @@ function create_uploaders() {
   })
 }
 
-var files = {};
-var list_of_file_ids = [];
 var file_counter = 0;
 //$('#')
 function handle_upload(e, file) {
@@ -329,9 +356,13 @@ function handle_upload(e, file) {
   if (file_id in files) { //if file name in array return
     return
   }
-  files[file_id] = arrays; // data from meta data sheet
-  list_of_file_ids.push(file_id);
-  $('#files').append("<option value="+file_id+">"+file_id+"</option>");
+  files.push(arrays); // data from meta data sheet
+   for(var i=0; i<files.length; i++) {
+      populate_stuff(files[i]);
+      OG_populated_file = files[i];
+   }
+
+ /* $('#files').append("<option value="+file_id+">"+file_id+"</option>");
   $('#files').multiselect('destroy');
 
 
@@ -379,7 +410,7 @@ $("#files").each(function() {
                   return;
             } 
       }
-  });
+  });*/
 }
 
 function populate_stuff(file_data) {
@@ -479,24 +510,44 @@ function get_lib_prep_code(lib_prep_kit) {
 
 
 function save_ale_metadata(array) {
-  var file_name = get_file_name()
-  var csv_data = [new CSV(array).encode()]
-  var file = new Blob(csv_data, {type: 'text/plain;charset=utf-8'})
-  saveAs(file, file_name + '.csv')
+  if (files.length == 0) {
+    var file_name = get_file_name()
+    var csv_data = [new CSV(array).encode()]
+    var file = new Blob(csv_data, {type: 'text/plain;charset=utf-8'})
+    saveAs(file, file_name + '.csv')
+  }
+  else {
+    for (var i = 0; i < files.length; i++) {
+       var label = folder_name(),
+       csv = [new CSV(files[i]).encode()],
+       file = new Blob(csv, {type: 'text/plain;charset=utf-8'})
+       saveAs(file, label + '.csv')
+    }
+  }
 }
 
 
 function save_generic_metadata(array) {
-  var label = folder_name(),
-    csv = [new CSV(array).encode()],
-    file = new Blob(csv, {type: 'text/plain;charset=utf-8'})
-  saveAs(file, label + '.csv')
+  if (files.length == 0) {
+     var label = folder_name(),
+       csv = [new CSV(array).encode()],
+       file = new Blob(csv, {type: 'text/plain;charset=utf-8'})
+       saveAs(file, label + '.csv')
+  }
+  else {
+    for (var i = 0; i < files.length; i++) {
+       var label = folder_name(),
+       csv = [new CSV(files[i]).encode()],
+       file = new Blob(csv, {type: 'text/plain;charset=utf-8'})
+       saveAs(file, label + '.csv')
+    }
+  }
+  
 }
 
 
 function get_value(id, input_only) {
   /** Get the value for the given input id */
-
   if (_.isUndefined(input_only))
     input_only = false
 
@@ -515,7 +566,7 @@ function get_value(id, input_only) {
 
   if (input_only)
     return vals
-
+   
   // add concentrations to val
   if (_.isArray(vals)) {
     return vals.map(function(val) {
@@ -535,9 +586,7 @@ function set_value(id, value) {
     console.warn('Unrecognized key ' + id)
     return
   }
-
   var sel = $('#' + id)
-
   if (sel.data('select2')) {
     var split_val = value.split(',').filter(function(x) {
       return x.replace(' ', '') !== ''
