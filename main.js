@@ -2,10 +2,6 @@
 /* global $, Blob, saveAs, CSV, d3, JSZip, _ */
 // CSV: https://github.com/knrz/CSV.js/
 
-$(document).ready(function() {
-        $('#files').multiselect();
-    });
-
 var data = [
   { label: 'Creator (Name)',
     id: 'creator',
@@ -305,21 +301,15 @@ function get_data_array() {
 function difference(array) {
    var the_difference = []
 
-      //var diff = []
-      //diff = array.filter(x => !OG_populated_file.includes(x));
-
        for (var k=0; k<OG_populated_file.length; k++) {
            
            if (JSON.stringify(array[k]).replace(/[\[\]']+/g,'') != JSON.stringify(OG_populated_file[k]).replace(/[\[\]']+/g,'')) {
-             //console.log(JSON.stringify(array[k]));
-             //console.log(JSON.stringify(OG_populated_file[k]));
-
+       
              the_difference.push(array[k]);
                    
           }
       }
-  console.log(JSON.stringify(the_difference))
-    
+
     return the_difference;
 }
 
@@ -373,37 +363,6 @@ function handle_upload(e, file) {
       OG_populated_file = files[i];
    }
 
-/* $('#files').append("<option value="+file_id+">"+file_id+"</option>");
-  $('#files').multiselect('destroy');
-
-
-
-  $('#files').multiselect({
-      includeSelectAllOption: true,
-      enableCaseInsensitiveFiltering: true,
-      maxHeight: 500,
-      onChange: function(option, checked, select) {
-
-$("#files").each(function() {
-    // Get newly selected elements
-
-file_map[file_id] = arrays;
-$('#files').find('option:selected').each(function(){
-    console.log($(this).val());
-    console.log(JSON.stringify(file_map));
-    console.log(file_map[$(this).val()]);
-
-
-});
-
-
-console.log(JSON.stringify(data))
-
-
-
-  });
-  }
-});*/
 }
 
 function populate_stuff(file_data) {
