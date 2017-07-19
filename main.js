@@ -233,7 +233,6 @@ $(document).ready(function(){
     var data_array = get_data_array()
     if (workflow == 'Generic') {
       save_generic_metadata(data_array)
-      console.log(files.length)
     } else {
       save_ale_metadata(data_array)
     }
@@ -280,11 +279,14 @@ function create_form(form_type) {
 }
 
 function get_data_array() {
+
   var data_array = []
   for(var i = 0; i < data.length; i++){
     var val = get_value(data[i]['id'])
     data_array.push([data[i]['id'], val])
   }
+
+
   var differences = difference(data_array)
   for(var j=0; j < files.length; j++) {
     for(var k=0; k < files[j].length; k++) {
@@ -293,22 +295,30 @@ function get_data_array() {
              files[j][k] = differences[l]
           }
        }
+
     }
   }
   return data_array
 }
 
+
 function difference(array) {
    var the_difference = []
+
+      var diff = []
+      diff = array.filter(x => !OG_populated_file.includes(x));
+
        for (var k=0; k<OG_populated_file.length; k++) {
            
-           if (JSON.stringify(array[k]).replace(/[\[\]']+/g,'') != JSON.stringify(OG_populated_file[k]).replace(/[\[\]']+/g,'')) {
-             //alert("john I did it");
+           if (JSON.stringify(array[k]).replace(/[\[\]']+/g,'') != JSON.stringify(diff[k]).replace(/[\[\]']+/g,'')) {
              //console.log(JSON.stringify(array[k]));
              //console.log(JSON.stringify(OG_populated_file[k]));
+
              the_difference.push(array[k]);
-           }
-       }
+                   
+          }
+      }
+  console.log(JSON.stringify(the_difference))
     
     return the_difference;
 }
@@ -344,6 +354,7 @@ function create_uploaders() {
 
 var file_counter = 0;
 //$('#')
+var file_map = {};
 function handle_upload(e, file) {
   var csv_data = e.target.result,
   arrays = new CSV(csv_data).parse()
@@ -362,7 +373,7 @@ function handle_upload(e, file) {
       OG_populated_file = files[i];
    }
 
- /* $('#files').append("<option value="+file_id+">"+file_id+"</option>");
+/* $('#files').append("<option value="+file_id+">"+file_id+"</option>");
   $('#files').multiselect('destroy');
 
 
@@ -372,45 +383,27 @@ function handle_upload(e, file) {
       enableCaseInsensitiveFiltering: true,
       maxHeight: 500,
       onChange: function(option, checked, select) {
-            var file_data = files[file_id];
-            var file_keys = Object.keys(files);
 
-            var previouslySelected = [];
 $("#files").each(function() {
     // Get newly selected elements
-    var currentlySelected = $('#files').val();
-    var newSelections = currentlySelected.filter(function (element) {
-                                console.log(newSelections);
 
-        return previouslySelected.indexOf(element) == -1;
-    });
-    previouslySelected = currentlySelected;
+file_map[file_id] = arrays;
+$('#files').find('option:selected').each(function(){
+    console.log($(this).val());
+    console.log(JSON.stringify(file_map));
+    console.log(file_map[$(this).val()]);
 
-    if (newSelections.length) {
-        // If there are multiple new selections, we'll take the last in the list
-        var lastSelected = newSelections.reverse()[0];
-
-    }
 
 });
 
-            if (checked == true){
+
+console.log(JSON.stringify(data))
 
 
-               for (var j = 0; j < file_keys.length; j++) {
-                       //alert(selected)
-                      if (file_keys[j] in selected) {
-                        file_data = files[file_keys[j]]
-                        alert(file_data)
-                        populate_stuff(file_data);
-                      }
-               }
-            }
-            else if (checked == false){ 
-                  return;
-            } 
-      }
-  });*/
+
+  });
+  }
+});*/
 }
 
 function populate_stuff(file_data) {
