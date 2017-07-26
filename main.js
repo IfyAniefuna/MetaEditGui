@@ -13,6 +13,9 @@ var data = [
     required: true,
     type: 'input',
     example: 'zakandrewking@gmail.com' },
+  { label: 'Serial Number',
+    id: 'serial-number',
+    type: 'input'},
   { label: 'Project Name',
     id: 'project',
     required: true,
@@ -211,6 +214,8 @@ var data_as_object = {}
 data.forEach(function(d) { data_as_object[d.id] = d })
 var workflow = 'Generic'
 var files = [];
+var new_array_files = []
+
 var OG_populated_file = []
 
 
@@ -236,7 +241,7 @@ $(document).ready(function(){
 
   $('#download_example').click(function(){
     var output_file_name = "ale_sample_names",
-        example_output = [["1","1","0","1"],["\n1","1","1","1"],["\n1","1","2","1"]],
+        example_output = [["1","1","0","1","serial-number"],["\n1","1","1","1","serial-number"],["\n1","1","2","1","serial-number"]],
         file = new Blob(example_output, { type: 'text/plain;charset=utf-8' })
     saveAs(file, output_file_name + '.csv')
   })
@@ -282,34 +287,83 @@ function get_data_array() {
     data_array.push([data[i]['id'], val])
   }
 
-
   var differences = difference(data_array)
-  for(var j=0; j < files.length; j++) {
-    for(var k=0; k < files[j].length; k++) {
-       for (var l=0; l< differences.length; l++) {
-          if ((files[j][k][0]) == (differences[l][0])) {
-             files[j][k] = differences[l]
-          }
-       }
+  new_array(data_array)
+ 
 
-    }
+  for(var j=0; j < new_array_files.length; j++) {
+      for(var k=0; k < new_array_files[j].length; k++) {
+        for (var l=0; l< differences.length; l++) {
+           
+            if ((new_array_files[j][k][0].toString()) == (differences[l][0].toString())) {
+             new_array_files[j][k] = differences[l] //INSerts
+            }  
+      }
+     } 
   }
+
+
+
   return data_array
+}
+
+function new_array(form_data) {
+
+for(var m=0; m < files.length; m++) {
+       var d_array = []
+       for(var i = 0; i < data.length; i++){
+       var val = get_value(data[i]['id'])
+      d_array.push([data[i]['id'], val])
+      }    
+      form_data = d_array
+
+      for(var n=0; n < files[m].length; n++) {
+         for (var o = 0; o < form_data.length; o++) {
+             if (form_data[o][0] == files[m][n][0]) {
+                 form_data[o] = files[m][n]
+             }
+
+         }
+     }
+   new_array_files.push(form_data)
+
+ }; 
+
+}
+
+function containsObject(obj, list) {
+    var i;
+    for (i = 0; i < list.length; i++) {
+        if (list[i] === obj) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 
 function difference(array) {
    var the_difference = []
-
-       for (var k=0; k<OG_populated_file.length; k++) {
-           
-           if (JSON.stringify(array[k]).replace(/[\[\]']+/g,'') != JSON.stringify(OG_populated_file[k]).replace(/[\[\]']+/g,'')) {
-       
-             the_difference.push(array[k]);
-                   
-          }
+    
+       for (var k=0; k<array.length; k++) {
+           array[k].value = false;
+           for (var j=0; j<OG_populated_file.length; j++) {
+               
+               if (array[k].toString() == OG_populated_file[j].toString()) {
+                          array[k].value = true;
+                          OG_populated_file[j].value = true;
+               }
+           }
+         
       }
-
+      for (var i = 0; i < array.length; i++) {
+        if (array[i].value == false) {
+          the_difference.push(array[i])
+            
+        }        
+      }
+  
     return the_difference;
 }
 
@@ -354,20 +408,22 @@ function handle_upload(e, file) {
     return
   }
 
-  if (file_id in files) { //if file name in array return
+  if (containsObject(arrays, files)) { //if file name in array return // fix cant daa same files
     return
   }
   files.push(arrays); // data from meta data sheet
    for(var i=0; i<files.length; i++) {
+    
       populate_stuff(files[i]);
-      OG_populated_file = files[i];
+      OG_populated_file = files[i]; // ORIGINAL FILE CONTENT
+
    }
 
 }
 
 function populate_stuff(file_data) {
   for (var i = 0; i < file_data.length; i++)
-    set_value(file_data[i][0], file_data[i][1])
+    set_value(file_data[i][0], file_data[i][1] + '')
   check_required()
 }
 
@@ -382,7 +438,7 @@ function get_file_name() {
   if (lib_prep != '')
     lib_prep = '_' + lib_prep
 
-  return get_value('project').toString()
+  return get_value('serial-number').toString() + '_' + get_value('project').toString()
     + lib_prep
     + '_'
     + get_value('ALE-number').toString()
@@ -396,6 +452,7 @@ const ALE_NUMBER_IDX = 0
 const FLASK_NUMBER_IDX = 1
 const ISOLATE_NUMBER_IDX = 2
 const TECHNICAL_REPLICATE_IDX = 3
+const SERIAL_NUMBER_IDX = 4
 
 function handle_name_upload(e, file) {
 
@@ -409,12 +466,12 @@ function handle_name_upload(e, file) {
   var output_sample_name_array = []
 
   var zip = new JSZip()
-
   for (var name_idx = 0; name_idx < variable_file_name_array.length; name_idx++) {
     set_value('ALE-number', variable_file_name_array[name_idx][ALE_NUMBER_IDX])
     set_value('Flask-number', variable_file_name_array[name_idx][FLASK_NUMBER_IDX])
     set_value('Isolate-number', variable_file_name_array[name_idx][ISOLATE_NUMBER_IDX])
     set_value('technical-replicate-number',variable_file_name_array[name_idx][TECHNICAL_REPLICATE_IDX])
+    set_value('serial-number',variable_file_name_array[name_idx][SERIAL_NUMBER_IDX])
 
     var file_name = get_file_name() + '.csv'
 
@@ -462,37 +519,97 @@ function get_lib_prep_code(lib_prep_kit) {
 
 
 function save_ale_metadata(array) {
-  if (files.length == 0) {
+  var zip = new JSZip()
+  if (files.length <= 1) {
     var file_name = get_file_name()
     var csv_data = [new CSV(array).encode()]
     var file = new Blob(csv_data, {type: 'text/plain;charset=utf-8'})
-    saveAs(file, file_name + '.csv')
+     if (get_value('serial-number').toString() != '') {
+       saveAs(file, get_value('serial-number').toString()  + '_' + get_value('ALE-number').toString() + '_' + get_value('Flask-number').toString()
+           + '_' + get_value('Isolate-number').toString() + '_' + get_value('technical-replicate-number').toString()
+            + '.csv');
+     } 
+     if (get_value('serial-number').toString() == '') {
+       saveAs(file, get_value('ALE-number').toString() + '_' + get_value('Flask-number').toString()
+           + '_' + get_value('Isolate-number').toString() + '_' + get_value('technical-replicate-number').toString()
+            + '.csv');
+     }
   }
-  else {
-    for (var i = 0; i < files.length; i++) {
-       var label = folder_name(),
-       csv = [new CSV(files[i]).encode()],
-       file = new Blob(csv, {type: 'text/plain;charset=utf-8'})
-       saveAs(file, label + '.csv')
-    }
+   if (files.length > 1) {
+    var ALE_numb = ''
+    var Flask_numb = ''
+    var Iso_numb = ''
+    var tech_rep_numb = ''
+
+    for (var x = 0; x < new_array_files.length; x++) {
+       var label = folder_name();
+       var csv = [new CSV(new_array_files[x]).encode()];
+       var file = new Blob(csv, {type: 'text/plain;charset=utf-8'});
+       for (var y = 0; y < new_array_files[x].length; y++) {
+            if (new_array_files[x][y][0] == "ALE-number") {
+                 ALE_numb = new_array_files[x][y][1]
+            }
+            if (new_array_files[x][y][0] == "Flask-number") {
+                 Flask_numb = new_array_files[x][y][1]
+            }
+            if (new_array_files[x][y][0] == "Isolate-number") {
+                 Iso_numb = new_array_files[x][y][1]
+            }
+            if (new_array_files[x][y][0] == "technical-replicate-number") {
+                 tech_rep_numb = new_array_files[x][y][1]
+            }
+       }
+         if (get_value('serial-number').toString() != '') {
+          zip.file(get_value('serial-number').toString() + '_' + ALE_numb + '_' + Flask_numb
+           + '_' + Iso_numb+ '_' + tech_rep_numb + '_' + get_value('project').toString() + '.csv', file);
+         }
+         if (get_value('serial-number').toString() == '') {
+          zip.file(ALE_numb + '_' + Flask_numb + '_' + Iso_numb+ '_' + tech_rep_numb 
+            + '_' + get_value('project').toString() + '.csv', file);
+
+         }
+     }
+
+    zip.generateAsync({type:"blob"}).then(function (content) {
+      saveAs(content, get_zip_name() + '.zip');
+    })
+      
   }
 }
 
 
 function save_generic_metadata(array) {
-  if (files.length == 0) {
-     var label = folder_name(),
-       csv = [new CSV(array).encode()],
-       file = new Blob(csv, {type: 'text/plain;charset=utf-8'})
-       saveAs(file, label + '.csv')
+  var zip = new JSZip();
+  if (files.length <= 1) {
+     var label = folder_name();
+     var csv = [new CSV(array).encode()];
+     var file = new Blob(csv, {type: 'text/plain;charset=utf-8'});
+     if (get_value('serial-number').toString() != '') {
+       saveAs(file, get_value('serial-number').toString() + '_' + label + '.csv');
+     } 
+     if (get_value('serial-number').toString() == '') {
+       saveAs(file, label + '.csv');
+     }
+
   }
-  else {
-    for (var i = 0; i < files.length; i++) {
-       var label = folder_name(),
-       csv = [new CSV(files[i]).encode()],
-       file = new Blob(csv, {type: 'text/plain;charset=utf-8'})
-       saveAs(file, label + '.csv')
+  if (files.length > 1) {
+    for (var x = 0; x < new_array_files.length; x++) {
+       var label = folder_name();
+       var csv = [new CSV(new_array_files[x]).encode()];
+       var file = new Blob(csv, {type: 'text/plain;charset=utf-8'});
+       if (get_value('serial-number').toString() != '') {
+          zip.file(get_value('serial-number').toString() + '_' + get_value('project').toString() + '_' + label + x + '.csv', file);
+       }
+       if (get_value('serial-number').toString() == '') {
+          zip.file(get_value('project').toString() + '_' + label + x + '.csv', file);
+
+       }     
     }
+
+    zip.generateAsync({type:"blob"}).then(function (content) {
+      saveAs(content, get_zip_name() + '.zip');
+    })
+      
   }
   
 }
@@ -534,12 +651,14 @@ function get_value(id, input_only) {
 
 
 function set_value(id, value) {
-  if (!(id in data_as_object)) {
+ if (!(id in data_as_object)) {
     console.warn('Unrecognized key ' + id)
     return
   }
   var sel = $('#' + id)
   if (sel.data('select2')) {
+    
+
     var split_val = value.split(',').filter(function(x) {
       return x.replace(' ', '') !== ''
     }),
@@ -569,20 +688,9 @@ function set_value(id, value) {
                           data_as_object[id]['concentration_with_default'],
                           concentrations)
     }
-  } else if (data_as_object[id]['type'] == 'date') {
-    var date = new Date(value)
-    var date_str = [
-      // Year in local time
-      date.getFullYear(),
-      // Month is given between 0-11
-      date.getMonth() + 1,
-      // Day is given between 0-30
-      date.getDate() + 1
-    ].join('-')
-    sel.val(date_str).trigger('change')
-  } else {
+  } 
     sel.val(value).trigger('change')
-  }
+  
 
   // update UI
   update_required_label(id, value)
