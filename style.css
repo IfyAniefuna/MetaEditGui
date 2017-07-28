@@ -1,3 +1,63 @@
+.panel-default>.panel-heading {
+  color: #fafafa;
+  border-color: #333;
+  background: url(https://ak5.picdn.net/shutterstock/videos/18199831/thumb/2.jpg);
+}
+
+code {
+  padding: 2px 4px;
+  font-size: 90%;
+  color: #46748e;
+  background-color: rgba(168, 201, 250, 0.47);
+  border-radius: 4px;
+}
+
+button#download_example.btn.btn-default {
+  display: inline-block;
+  margin-bottom: 0;
+  padding: 0px 2px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;    
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-image: none;
+  border: 1px solid #f5f5f5;
+  border-radius: 4px;
+}
+
+label.btn.btn-primary.toggle-on {
+  color: #fff;
+  background-color: #133d39;
+  border-color: #333;
+}
+
+label.btn.btn-success.active.toggle-off {
+  color: #fff;
+  background-color: #308977;
+  border-color: #333;
+}
+
+.h1, h1 {
+  font-size: 40px;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1.1;
+  color: #133d39;
+}
+
+
 #center-column {
   padding-bottom: 0;
 }
@@ -29,24 +89,24 @@
   height: 60px;
   border: 2px solid #fff;
   padding: 20px;
-  border: 2px dashed #ddd;
+  border: 2px dashed #46748e;
   text-align: center;
 }
 
 #file-upload.drag {
-  background-color: #ffdddd;
+  background-color: #dff0d8;
 }
 
 #name-file-upload{
   height: 60px;
   border: 2px solid #fff;
   padding: 20px;
-  border: 2px dashed #ddd;
+  border: 2px dashed #46748e;
   text-align: center;
 }
 
 #name-file-upload.drag {
-  background-color: #ffdddd;
+  background-color: #dff0d8;
 }
 
 .concentration-input {

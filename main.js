@@ -7,12 +7,12 @@ var data = [
     id: 'creator',
     required: true,
     type: 'input',
-    example: 'Zachary King' },
+    example: 'Ify Aniefuna' },
   { label: 'Creator Email',
     id: 'creator-email',
     required: true,
     type: 'input',
-    example: 'zakandrewking@gmail.com' },
+    example: 'ify.aniefuna@gmail.com' },
   { label: 'Serial Number',
     id: 'serial-number',
     type: 'input'},
@@ -26,6 +26,13 @@ var data = [
     custom: true,
     default: 'DNA-seq',
     options: ['DNA-seq', 'RNA-seq', 'ChIP-seq', 'ChIP-exo', 'Ribo-seq'] },
+  { label: 'Read Files',
+    id: 'read-files',
+    type: 'dropdown',
+    multiple: true,
+    custom: true,
+    none: true,
+    options: [' '] },
   { label: 'Experiment Date (YYYY-MM-DD)',
     id: 'run-date',
     required: true,
@@ -214,9 +221,8 @@ var data_as_object = {}
 data.forEach(function(d) { data_as_object[d.id] = d })
 var workflow = 'Generic'
 var files = [];
-var new_array_files = []
-
-var OG_populated_file = []
+var new_files = []
+var original_file_content = []
 
 
 $(document).ready(function(){
@@ -287,84 +293,66 @@ function get_data_array() {
     data_array.push([data[i]['id'], val])
   }
 
-  var differences = difference(data_array)
-  new_array(data_array)
+  var form_changes = file_differences(data_array)
+  update_files(data_array)
  
 
-  for(var j=0; j < new_array_files.length; j++) {
-      for(var k=0; k < new_array_files[j].length; k++) {
-        for (var l=0; l< differences.length; l++) {
+  for(var j=0; j < new_files.length; j++) {
+    for(var k=0; k < new_files[j].length; k++) {
+      for (var l=0; l< form_changes.length; l++) {
            
-            if ((new_array_files[j][k][0].toString()) == (differences[l][0].toString())) {
-             new_array_files[j][k] = differences[l] //INSerts
-            }  
+          if ((new_files[j][k][0].toString()) == (form_changes[l][0].toString())) {
+             new_files[j][k] = form_changes[l] 
+          }  
       }
-     } 
+    } 
   }
-
-
 
   return data_array
 }
 
-function new_array(form_data) {
 
-for(var m=0; m < files.length; m++) {
-       var d_array = []
-       for(var i = 0; i < data.length; i++){
-       var val = get_value(data[i]['id'])
-      d_array.push([data[i]['id'], val])
-      }    
-      form_data = d_array
+function update_files(form_data) {
 
-      for(var n=0; n < files[m].length; n++) {
-         for (var o = 0; o < form_data.length; o++) {
-             if (form_data[o][0] == files[m][n][0]) {
-                 form_data[o] = files[m][n]
+    for(var i=0; i < files.length; i++) {
+       var new_data_array = [];
+       for(var j = 0; j < data.length; j++){
+          var value = get_value(data[j]['id']);
+          new_data_array.push([data[j]['id'], value]);
+       }    
+       form_data = new_data_array;
+ 
+       for(var k=0; k < files[i].length; k++) {
+          for (var n = 0; n < form_data.length; n++) {
+             if (form_data[n][0] == files[i][k][0]) {
+                 form_data[n] = files[i][k];
              }
-
-         }
-     }
-   new_array_files.push(form_data)
-
- }; 
-
+          }
+       }
+    new_files.push(form_data);
+    }; 
 }
 
-function containsObject(obj, list) {
-    var i;
-    for (i = 0; i < list.length; i++) {
-        if (list[i] === obj) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-function difference(array) {
-   var the_difference = []
+function file_differences(array) {
+    var the_differences = []
     
-       for (var k=0; k<array.length; k++) {
-           array[k].value = false;
-           for (var j=0; j<OG_populated_file.length; j++) {
+    for (var k=0; k<array.length; k++) {
+        array[k].value = false;
+        for (var j=0; j<original_file_content.length; j++) {
                
-               if (array[k].toString() == OG_populated_file[j].toString()) {
-                          array[k].value = true;
-                          OG_populated_file[j].value = true;
-               }
+           if (array[k].toString() == original_file_content[j].toString()) {
+               array[k].value = true;
+               original_file_content[j].value = true;
            }
-         
-      }
-      for (var i = 0; i < array.length; i++) {
+        }     
+    }
+    for (var i = 0; i < array.length; i++) {
         if (array[i].value == false) {
-          the_difference.push(array[i])
-            
+           the_differences.push(array[i])
         }        
-      }
+    }
   
-    return the_difference;
+    return the_differences;
 }
 
 function check_required() {
@@ -396,9 +384,6 @@ function create_uploaders() {
   })
 }
 
-var file_counter = 0;
-//$('#')
-var file_map = {};
 function handle_upload(e, file) {
   var csv_data = e.target.result,
   arrays = new CSV(csv_data).parse()
@@ -407,21 +392,23 @@ function handle_upload(e, file) {
   if (file_id.indexOf(".csv") == -1) {
     return
   }
+  for (var j = 0; j < files.length; j++) {
+    if (JSON.stringify(files[j]) == JSON.stringify(arrays)) {
+      return
+    }
+  };
 
-  if (containsObject(arrays, files)) { //if file name in array return // fix cant daa same files
-    return
-  }
   files.push(arrays); // data from meta data sheet
-   for(var i=0; i<files.length; i++) {
+  for(var i=0; i<files.length; i++) {
     
-      populate_stuff(files[i]);
-      OG_populated_file = files[i]; // ORIGINAL FILE CONTENT
+     populate_metaform(files[i]);
+     original_file_content = files[i]; // ORIGINAL FILE CONTENT
 
-   }
+  }
 
 }
 
-function populate_stuff(file_data) {
+function populate_metaform(file_data) {
   for (var i = 0; i < file_data.length; i++)
     set_value(file_data[i][0], file_data[i][1] + '')
   check_required()
@@ -541,22 +528,22 @@ function save_ale_metadata(array) {
     var Iso_numb = ''
     var tech_rep_numb = ''
 
-    for (var x = 0; x < new_array_files.length; x++) {
+    for (var x = 0; x < new_files.length; x++) {
        var label = folder_name();
-       var csv = [new CSV(new_array_files[x]).encode()];
+       var csv = [new CSV(new_files[x]).encode()];
        var file = new Blob(csv, {type: 'text/plain;charset=utf-8'});
-       for (var y = 0; y < new_array_files[x].length; y++) {
-            if (new_array_files[x][y][0] == "ALE-number") {
-                 ALE_numb = new_array_files[x][y][1]
+       for (var y = 0; y < new_files[x].length; y++) {
+            if (new_files[x][y][0] == "ALE-number") {
+                 ALE_numb = new_files[x][y][1]
             }
-            if (new_array_files[x][y][0] == "Flask-number") {
-                 Flask_numb = new_array_files[x][y][1]
+            if (new_files[x][y][0] == "Flask-number") {
+                 Flask_numb = new_files[x][y][1]
             }
-            if (new_array_files[x][y][0] == "Isolate-number") {
-                 Iso_numb = new_array_files[x][y][1]
+            if (new_files[x][y][0] == "Isolate-number") {
+                 Iso_numb = new_files[x][y][1]
             }
-            if (new_array_files[x][y][0] == "technical-replicate-number") {
-                 tech_rep_numb = new_array_files[x][y][1]
+            if (new_files[x][y][0] == "technical-replicate-number") {
+                 tech_rep_numb = new_files[x][y][1]
             }
        }
          if (get_value('serial-number').toString() != '') {
@@ -593,22 +580,22 @@ function save_generic_metadata(array) {
 
   }
   if (files.length > 1) {
-    for (var x = 0; x < new_array_files.length; x++) {
+     for (var x = 0; x < new_files.length; x++) {
        var label = folder_name();
-       var csv = [new CSV(new_array_files[x]).encode()];
+       var csv = [new CSV(new_files[x]).encode()];
        var file = new Blob(csv, {type: 'text/plain;charset=utf-8'});
        if (get_value('serial-number').toString() != '') {
-          zip.file(get_value('serial-number').toString() + '_' + get_value('project').toString() + '_' + label + x + '.csv', file);
+          zip.file(get_value('serial-number').toString() + '_' + 
+            get_value('project').toString() + '_' + label + x + '.csv', file);
        }
        if (get_value('serial-number').toString() == '') {
           zip.file(get_value('project').toString() + '_' + label + x + '.csv', file);
-
        }     
-    }
+     }
 
-    zip.generateAsync({type:"blob"}).then(function (content) {
-      saveAs(content, get_zip_name() + '.zip');
-    })
+     zip.generateAsync({type:"blob"}).then(function (content) {
+       saveAs(content, get_zip_name() + '.zip');
+     })
       
   }
   
@@ -712,14 +699,15 @@ function update_required_label(id, value) {
 }
 
 
-function add_form_container(html, label, required, id, description, custom, multiple) {
+function add_form_container(html, label, required, id, description, custom, multiple, none) {
   var required_str, custom_mult_str, description_str
   if (required)
     required_str = '<span id="required-alert-' + id + '" class="required alert alert-danger" role="alert">(Required)</span>'
   else
     required_str = ''
-
-  if (custom && multiple)
+  if (none)
+    custom_mult_str = ''
+  else if (custom && multiple)
     custom_mult_str = ' (Choose one or more, including custom values)'
   else if (custom)
     custom_mult_str = ' (Choose or enter a new value)'
@@ -829,6 +817,7 @@ function create_input(data, parent_sel, autofocus) {
       min = data['min'],
       html = '',
       autofocus_str = autofocus ? ' autofocus' : '',
+      none = data['none'],
       after_append
 
   // check for some required attributes
@@ -849,12 +838,24 @@ function create_input(data, parent_sel, autofocus) {
     }
     // custom options
     if (custom) {
-      select_options['tags'] = true
-      select_options['createTag'] = function(query) {
-        return {
-          id: query.term,
-          text: query.term + ' (custom)',
-          tag: true
+      if (none) {
+        select_options['tags'] = true
+          select_options['createTag'] = function(query) {
+          return {
+            id: query.term,
+            text: query.term,
+            tag: true
+          }
+        }
+      }
+      else if (!none) {
+        select_options['tags'] = true
+          select_options['createTag'] = function(query) {
+          return {
+            id: query.term,
+            text: query.term + ' (custom)',
+            tag: true
+          }
         }
       }
     }
@@ -902,7 +903,7 @@ function create_input(data, parent_sel, autofocus) {
   }
 
   // create and run
-  parent_sel.append(add_form_container(html, label, required, id, description, custom, multiple))
+  parent_sel.append(add_form_container(html, label, required, id, description, custom, multiple, none))
   // toggle the required label
   $('#' + id).on('change', function() {
     update_required_label(id, this.value)

@@ -23,6 +23,7 @@
     <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.min.css" rel="stylesheet" />
     <link href="style.css" rel="stylesheet" />
 
+
     <!-- Bootstrap Toggle -->
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
@@ -40,7 +41,7 @@
       </h1>
 
       <p class="lead">
-        Use this tool to generate a CSV file with all the relevant metadata for
+        Use this tool to generate one or more CSV files with all the relevant metadata for
         an experiment.
       </p>
 
@@ -76,25 +77,23 @@
         </li>
         <ul>
           <li>
-            Each data type collected on a given day gets a unique folder.
+            Each data type collected on a given day is put into a unique folder.
           </li>
           <li>
-            The Project Name can be anything you want, but try to make it
-            short, unique, and descriptive.
+            The Project Name should be short, unique, and descriptive.
           </li>
           <li>
-            The Folder Name looks like <code>{YYYY}-{MM}-{DD}_{data type}</code>.
+            The Folder Name format is as follows <code>{YYYY}-{MM}-{DD}_{data type}</code>.
           </li>
           <li>
-            To make things easier, after you fill out this form, the Folder
-            Name is provided at the bottom of the page.
+            The Folder Name is provided at the bottom of the page.
           </li>
           <li>
             If there are duplicates, then add <code>_1</code>,
             <code>_2</code>, &hellip; to the end.
           </li>
           <li>
-            Example: <code>data/raw_data/z1king/Y-ome/2015-11-19_Tn-Seq_1/</code>
+            Example: <code>data/raw_data/ianiefuna/Y-ome/2015-11-19_Tn-Seq_1/</code>
           </li>
         </ul>
         <li>
@@ -109,7 +108,7 @@
       </p>
       <hr/>
       </div>
-
+   
       <div class="panel panel-default">
         <div class="panel-heading">
           <strong>(Optional)</strong> Load an existing CSV file as a starting point for the new
